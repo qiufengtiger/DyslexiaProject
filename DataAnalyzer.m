@@ -69,7 +69,7 @@ classdef DataAnalyzer < handle
             for i = 1 : size(heatMapData, 2)
                 heatMapData{i} = heatMapData{i} / heatMapParticipantNum(i);
             end
-            DataAnalyzer.drawHeatMap(heatMapData); 
+            DataAnalyzer.drawHeatMaps(heatMapData); 
         end
         
         function summaryParticipantGroup(obj)
@@ -169,10 +169,37 @@ classdef DataAnalyzer < handle
             correctPrediction / totalPrediction    
         end
         
-        function createBaseLine(obj)
-            numBaseLineParticipant = 20;
-            baseLineParticipants = {};
+        function heatMapData = createBaseLine(obj, mazeIndex)
+            baseLineParticipantNum = 20;
+            baseLineParticipants = zeros(baseLineParticipantNum, 1);
+            randCreatedNum = 0;
+            heatMapDataTrial6 = zeros(6, 6); % trial 6 only
+            heatMapParticipantNum = 0;
             
+            while true
+                participantIndex = ceil(rand * size(obj.typicalParticipantData, 2));
+                if(~ismember(participantIndex, baseLineParticipants))
+                    randCreatedNum = randCreatedNum + 1;
+                    baseLineParticipants(randCreatedNum, 1) = participantIndex;
+                end
+                if(randCreatedNum == baseLineParticipantNum)
+                    break; 
+                end
+            end
+            
+            for i = 1 : baseLineParticipantNum
+                returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
+                if(~isempty(returnData))
+                    heatMapParticipantNum = heatMapParticipantNum + 1;
+                    heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
+                end
+            end
+            heatMapDataTrial6 = heatMapDataTrial6 / heatMapParticipantNum;
+            DataAnalyzer.drawSingleHeatMap(heatMapDataTrial6, [-0.5, 0.5], "trial6");
+            
+            testData = DataAnalyzer.getHeatMapData(obj.atypicalParticipantData{2}, mazeIndex);
+            testTrial = testData{6};
+            corr2(testTrial, heatMapDataTrial6)
             
         end
         
@@ -230,27 +257,26 @@ classdef DataAnalyzer < handle
             
         end
         
-        function averageTrials = drawHeatMap(heatMapData)
+        function averageTrials = drawHeatMaps(heatMapData)
             averageTrials = zeros(6, 6);
             for i = 1 : size(heatMapData, 2)
                 subplot(3, 3, i);
                 title = sprintf("trial %d", i);
-                heatMap = heatmap(heatMapData{i}, 'ColorLimits', [-0.5, 2.5]);
-                heatMap.XLabel = 'X';
-                heatMap.YLabel = 'Y';
-                heatMap.Title = title;
-                heatMap.XData = ["A", "B", "C", "D", "E", "F"];
-                heatMap.YData = ["1", "2", "3", "4", "5", "6"];
+                DataAnalyzer.drawSingleHeatMap(heatMapData{i}, [-0.5, 2.5], title);
                 averageTrials = averageTrials + heatMapData{i};
             end
             averageTrials = averageTrials / size(heatMapData, 2);
             subplot(3, 3, 7);
-            heatMap = heatmap(averageTrials, 'ColorLimits', [-0.5, 1]);
-            heatMap.XLabel = 'X';
-            heatMap.YLabel = 'Y';
-            heatMap.Title = "average";
-            heatMap.XData = ["A", "B", "C", "D", "E", "F"];
-            heatMap.YData = ["1", "2", "3", "4", "5", "6"];
+            DataAnalyzer.drawSingleHeatMap(averageTrials, [-0.5, 1], "average");
+        end
+        
+        function returnHeatMap = drawSingleHeatMap(heatMapDataSingleTrial, limit, title)
+            returnHeatMap = heatmap(heatMapDataSingleTrial, 'colorLimits', limit);
+            returnHeatMap.XData = ["A", "B", "C", "D", "E", "F"];
+            returnHeatMap.YData = ["1", "2", "3", "4", "5", "6"];
+            returnHeatMap.XLabel = 'X';
+            returnHeatMap.YLabel = 'Y';
+            returnHeatMap.Title = title;
         end
         
         function returnObj = getHeatMapData(participant, mazeIndex)
