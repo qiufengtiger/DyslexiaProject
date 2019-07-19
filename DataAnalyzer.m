@@ -5,6 +5,9 @@ classdef DataAnalyzer < handle
         atypicalParticipantData;
 %         correctPrediction;
 %         totalPrediction;
+
+        standardMaze8Trial6;
+        standardMaze11Trial6;
     end
     
     properties(Constant)
@@ -26,6 +29,8 @@ classdef DataAnalyzer < handle
         function obj = DataAnalyzer()
             obj.typicalParticipantData = {};
             obj.atypicalParticipantData = {};
+            obj.standardMaze8Trial6 = zeros(6, 6);
+            obj.standardMaze11Trial6 = zeros(6, 6);
         end
         
         function initializeAnalyzer(obj)
@@ -48,6 +53,7 @@ classdef DataAnalyzer < handle
         end
         
         function summaryHeatMap(obj, participantType, mazeIndex)
+            % average heat map data
             heatMapData = {zeros(6, 6), zeros(6, 6), zeros(6, 6), zeros(6, 6), zeros(6, 6), zeros(6, 6)};
             heatMapParticipantNum = [0, 0, 0, 0, 0, 0];
             if(participantType == DataAnalyzer.TYPICAL)
@@ -169,10 +175,11 @@ classdef DataAnalyzer < handle
             correctPrediction / totalPrediction    
         end
         
-        function heatMapData = createBaseLine(obj, mazeIndex)
+        function createBaseLine(obj, mazeIndex)
             baseLineParticipantNum = 20;
             baseLineParticipants = zeros(baseLineParticipantNum, 1);
             randCreatedNum = 0;
+            % store baseline data. later will be assigned to properties
             heatMapDataTrial6 = zeros(6, 6); % trial 6 only
             heatMapParticipantNum = 0;
             
@@ -194,13 +201,33 @@ classdef DataAnalyzer < handle
                     heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
                 end
             end
-            heatMapDataTrial6 = heatMapDataTrial6 / heatMapParticipantNum;
-            DataAnalyzer.drawSingleHeatMap(heatMapDataTrial6, [-0.5, 0.5], "trial6");
             
-            testData = DataAnalyzer.getHeatMapData(obj.atypicalParticipantData{2}, mazeIndex);
-            testTrial = testData{6};
-            corr2(testTrial, heatMapDataTrial6)
+            % assign to specific properties in the object
+            if(mazeIndex == 8)
+                obj.standardMaze8Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
+            elseif(mazeIndex == 11)
+                obj.standardMaze11Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
+            end  
             
+%             corr2(testTrial, heatMapDataTrial6)
+            
+        end
+        
+        % get data using DataAnalyzer.getHeatMapData first, then call this
+        % method with the data returned
+        function returnCorr = applyCorrelation(obj, heatMapData, mazeIndex)
+            standard = zeros(6, 6);
+            returnCorr = zeros(6, 1);
+            if(mazeIndex == 8)
+                standard = obj.standardMaze8Trial6;
+            elseif(mazeIndex == 11)
+                standard = obj.standardMaze11Trial6;
+            end
+            
+            % run through 6 trials
+            for i = 1 : size(heatMapData, 2)
+                returnCorr(i, 1) = corr2(heatMapData{i}, standard);
+            end
         end
         
         
