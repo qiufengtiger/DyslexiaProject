@@ -208,10 +208,8 @@ classdef DataAnalyzer < handle
             elseif(mazeIndex == 11)
                 obj.standardMaze11Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
             end  
-            % run correlations on baseline participants
+            % run correlations on baseline participants abd plot the region
             trialNum = [1, 2, 3, 4, 5, 6];
-
-
             returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(1, 1)}, mazeIndex);           
             returnCorr = applyCorrelation(obj, returnData, mazeIndex);
             plot(trialNum, returnCorr, '-o');
