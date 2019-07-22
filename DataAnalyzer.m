@@ -36,18 +36,18 @@ classdef DataAnalyzer < handle
         function initializeAnalyzer(obj)
             loadParticipantData(obj);
             sortParticipantGroup(obj);
-        end
-        
-        function loadParticipantData(obj)
-            obj.allParticipantData = evalin('base', 'participantData');
-        end
-        
-        function sortParticipantGroup(obj)
-            for i = 1 : size(obj.allParticipantData, 2)
-                if(get(obj.allParticipantData{i}, 'group') == 1)
-                    obj.typicalParticipantData{end + 1} = obj.allParticipantData{i};
-                else
-                    obj.atypicalParticipantData{end + 1} = obj.allParticipantData{i};
+            
+            function loadParticipantData(obj)
+                obj.allParticipantData = evalin('base', 'participantData');
+            end
+            
+            function sortParticipantGroup(obj)
+                for i = 1 : size(obj.allParticipantData, 2)
+                    if(get(obj.allParticipantData{i}, 'group') == 1)
+                        obj.typicalParticipantData{end + 1} = obj.allParticipantData{i};
+                    else
+                        obj.atypicalParticipantData{end + 1} = obj.allParticipantData{i};
+                    end
                 end
             end
         end
@@ -79,7 +79,7 @@ classdef DataAnalyzer < handle
         end
         
         function summaryParticipantGroup(obj)
-            dataType = DataAnalyzer.DISTANCE;
+            dataType = DataAnalyzer.DURATION;
             typicalMaze1 = averageData(obj, 1, DataAnalyzer.TYPICAL, dataType);
             atypicalMaze1 = averageData(obj, 1, DataAnalyzer.ATYPICAL, dataType);
             typicalMaze5 = averageData(obj, 5, DataAnalyzer.TYPICAL, dataType);
@@ -176,16 +176,21 @@ classdef DataAnalyzer < handle
         end
         
         function createBaseLine(obj, mazeIndex)
-            baseLineParticipantNum = 20;
+            baseLineParticipantNum = 60;
             baseLineParticipants = zeros(baseLineParticipantNum, 1);
+%             baseLineData = {zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), ...
+%                 zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), };
             randCreatedNum = 0;
-            % store baseline data. later will be assigned to properties
+            % store baseline trial 6 data. later will be assigned to properties
             heatMapDataTrial6 = zeros(6, 6); % trial 6 only
             heatMapParticipantNum = 0;
+            averageBaseLineCorr = zeros(6, 1);
+            
             
             while true
                 participantIndex = ceil(rand * size(obj.typicalParticipantData, 2));
-                if(~ismember(participantIndex, baseLineParticipants))
+                % does not included yet && heat map data not empty
+                if(~ismember(participantIndex, baseLineParticipants) && ~isempty(DataAnalyzer.getHeatMapData(obj.typicalParticipantData{participantIndex}, mazeIndex)))
                     randCreatedNum = randCreatedNum + 1;
                     baseLineParticipants(randCreatedNum, 1) = participantIndex;
                 end
@@ -196,10 +201,8 @@ classdef DataAnalyzer < handle
             
             for i = 1 : baseLineParticipantNum
                 returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
-                if(~isempty(returnData))
-                    heatMapParticipantNum = heatMapParticipantNum + 1;
-                    heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
-                end
+                heatMapParticipantNum = heatMapParticipantNum + 1;
+                heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
             end
             
             % assign to specific properties in the object
@@ -208,16 +211,37 @@ classdef DataAnalyzer < handle
             elseif(mazeIndex == 11)
                 obj.standardMaze11Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
             end  
-            % run correlations on baseline participants abd plot the region
+            % run correlations on baseline participants and plot the region
             trialNum = [1, 2, 3, 4, 5, 6];
-            returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(1, 1)}, mazeIndex);           
-            returnCorr = applyCorrelation(obj, returnData, mazeIndex);
-            plot(trialNum, returnCorr, '-o');
+            figure;
             hold on;     
-            for i = 2 : baseLineParticipantNum
+            for i = 1 : baseLineParticipantNum
+                thisPart = obj.typicalParticipantData{baseLineParticipants(i, 1)};
+%                 refData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
                 returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
-                returnCorr = applyCorrelation(obj, returnData, mazeIndex);
-                plot(trialNum, returnCorr, '-o');
+                if(~isempty(returnData))
+                    returnCorr = applyCorrelation(obj, returnData, mazeIndex);
+                    plot(trialNum, returnCorr, 'bo');
+                    averageBaseLineCorr = averageBaseLineCorr + returnCorr;
+                end
+                
+            end
+            averageBaseLineCorr = averageBaseLineCorr / baseLineParticipantNum;
+            plot(trialNum, averageBaseLineCorr, '-y*');
+            hold off;
+        end
+        
+        function plotAtypicalCorr(obj, mazeIndex)
+            trialNum = [1, 2, 3, 4, 5, 6];
+%             figure;
+            hold on;
+            for i = 1 : size(obj.atypicalParticipantData, 2)
+                returnData = DataAnalyzer.getHeatMapData(obj.atypicalParticipantData{i}, mazeIndex);
+                if(~isempty(returnData))
+                    returnCorr = applyCorrelation(obj, returnData, mazeIndex);
+                    plot(trialNum, returnCorr, '-rx');
+                end
+                
             end
             hold off;
         end
@@ -227,15 +251,21 @@ classdef DataAnalyzer < handle
         function returnCorr = applyCorrelation(obj, heatMapData, mazeIndex)
             standard = zeros(6, 6);
             returnCorr = zeros(6, 1);
-            if(mazeIndex == 8)
-                standard = obj.standardMaze8Trial6;
-            elseif(mazeIndex == 11)
-                standard = obj.standardMaze11Trial6;
-            end
+            
+            % if compare with average, comment out the line after this if block 
+%             if(mazeIndex == 8)
+%                 standard = obj.standardMaze8Trial6;
+%             elseif(mazeIndex == 11)
+%                 standard = obj.standardMaze11Trial6;
+%             end
+            % if compare with this participant's own trial 6
+            standard = heatMapData{6};
             
             % run through 6 trials
             for i = 1 : size(heatMapData, 2)
-                returnCorr(i, 1) = corr2(heatMapData{i}, standard);
+                xcorrResult = normxcorr2(heatMapData{i}, standard);
+                returnCorr(i, 1) = sum(xcorrResult, 'all');
+%                 returnCorr(i, 1) = 0.5 * ssim(heatMapData{i}, standard) + 0.5;
             end
         end
         
@@ -289,9 +319,6 @@ classdef DataAnalyzer < handle
     end
     
     methods(Static)
-        function checkResult = makePrediction()
-            
-        end
         
         function averageTrials = drawHeatMaps(heatMapData)
             averageTrials = zeros(6, 6);
