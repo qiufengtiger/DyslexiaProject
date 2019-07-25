@@ -1,27 +1,35 @@
-clear aclear all;
+clear all;
 % group
 % 1 typical
 % 2 atypical
-warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
-warning('off', 'MATLAB:textscan:UnableToGuessFormat');
-warning('off', 'MATLAB:textscan:AllNatSuggestFormat');
 
+% Disable warnings
+warning('off', 'MATLAB:table:ModifiedAndSavedVarnames'); % some variable names in the csv file are not supported
+warning('off', 'MATLAB:textscan:AllNatSuggestFormat'); % variable names above will be changed automatically
+warning('off', 'MATLAB:textscan:UnableToGuessFormat'); % some time / date values cannot be read. does not matter since they are not used in data analysis
+
+% load file names
 Parameters;
 
 dc = DataCollector;
-% da = DataAnalyzer;
 readData(dc);
-
-
-
-% loadParticipantData(da);
-% sortParticipantGroup(da);
 
 readFileHeatMap(dc, 'Combined_Maze_8_data_UPDATED_participants_removed_PE', 8);
 readFileHeatMap(dc, 'Combined_Maze_11_data_UPDATED_PE', 11);
+readFileOverallData(dc, 'VirtualMazeData__8to12_slope.05.27.2015');
 
 participantName = get(dc, 'name');
 participantData = get(dc, 'data');
 
-
-% print(dc);
+%% Run main and data should be collected and saved to workspace
+% After that, run following commands to start data analysis
+%% Start
+% da = DataAnalyzer;
+% initializeAnalyzer(da);
+%% Create heat map. Pick correct inputs
+% summaryHeatMap(da, DataAnalyzer.TYPICAL / DataAnalyzer.ATYPICAL, 8 / 11);
+%% Plot average data. Data type can be changed in the function
+% summaryParticipantGroup(da);
+%% Plot correlation on heat map data to each participant's trial 6 to check their improvment
+% createBaseLine(da, 8 / 11);
+% plotAtypicalCorr(da, 8 / 11);

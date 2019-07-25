@@ -1,10 +1,9 @@
+% Used to analyze average / heat map data and make predictions
 classdef DataAnalyzer < handle
     properties
         allParticipantData;
         typicalParticipantData;
         atypicalParticipantData;
-%         correctPrediction;
-%         totalPrediction;
 
         standardMaze8Trial6;
         standardMaze11Trial6;
@@ -26,6 +25,7 @@ classdef DataAnalyzer < handle
     end
     
     methods
+        % Constructor
         function obj = DataAnalyzer()
             obj.typicalParticipantData = {};
             obj.atypicalParticipantData = {};
@@ -33,6 +33,7 @@ classdef DataAnalyzer < handle
             obj.standardMaze11Trial6 = zeros(6, 6);
         end
         
+        % Read data in sort participants
         function initializeAnalyzer(obj)
             loadParticipantData(obj);
             sortParticipantGroup(obj);
@@ -43,7 +44,7 @@ classdef DataAnalyzer < handle
             
             function sortParticipantGroup(obj)
                 for i = 1 : size(obj.allParticipantData, 2)
-                    if(get(obj.allParticipantData{i}, 'group') == 1)
+                    if(get(obj.allParticipantData{i}, 'group') == DataAnalyzer.TYPICAL)
                         obj.typicalParticipantData{end + 1} = obj.allParticipantData{i};
                     else
                         obj.atypicalParticipantData{end + 1} = obj.allParticipantData{i};
@@ -52,10 +53,13 @@ classdef DataAnalyzer < handle
             end
         end
         
+        % Generate heat maps for 6 trials plus average. Only maze 8 and 11
+        % have data
         function summaryHeatMap(obj, participantType, mazeIndex)
             % average heat map data
             heatMapData = {zeros(6, 6), zeros(6, 6), zeros(6, 6), zeros(6, 6), zeros(6, 6), zeros(6, 6)};
             heatMapParticipantNum = [0, 0, 0, 0, 0, 0];
+            % get data according to participant type
             if(participantType == DataAnalyzer.TYPICAL)
                 participant = obj.typicalParticipantData;
             elseif(participantType == DataAnalyzer.ATYPICAL)
@@ -66,18 +70,22 @@ classdef DataAnalyzer < handle
                 returnData = DataAnalyzer.getHeatMapData(thisParticipant, mazeIndex);
                 if(~isempty(returnData)) % not empty
                     heatMapParticipantNum = heatMapParticipantNum + 1;
+                    % trial 1 to trial 6. 
                     for j = 1 : 6
+                        % sum each trial to each total data
                         heatMapData{j} = heatMapData{j} + returnData{j};
                     end
                 end
             end
-            % average
+            % average each trial
             for i = 1 : size(heatMapData, 2)
                 heatMapData{i} = heatMapData{i} / heatMapParticipantNum(i);
             end
             DataAnalyzer.drawHeatMaps(heatMapData); 
         end
         
+        % Draw line plots showing average data of all mazes. To change data type, modify
+        % dataType variable. Available data types are in DataAnalyzer's properties
         function summaryParticipantGroup(obj)
             dataType = DataAnalyzer.DURATION;
             typicalMaze1 = averageData(obj, 1, DataAnalyzer.TYPICAL, dataType);
@@ -146,6 +154,7 @@ classdef DataAnalyzer < handle
             end
         end
         
+        % TODO
         function runPredict(obj)
             mazeIndex = 8;
             correctPrediction = 0;
@@ -154,8 +163,7 @@ classdef DataAnalyzer < handle
                 thisParticipant = obj.allParticipantData{i};
                 predictParticipant(obj, thisParticipant, mazeIndex);
             end
-            
-            
+             
             function predictParticipant(obj, participant, mazeIndex)
                 % prediction
                 heatMapData = DataAnalyzer.getHeatMapData(participant, mazeIndex);
@@ -175,21 +183,27 @@ classdef DataAnalyzer < handle
             correctPrediction / totalPrediction    
         end
         
+        % Randomly select certain number of typical participants and draw the 
+        % correlation of their each trial to their trial 6. The original
+        % version uses the average of trial 6 data as correlation reference
         function createBaseLine(obj, mazeIndex)
-            baseLineParticipantNum = 60;
+            baseLineParticipantNum = 50; % #typical participant used
             baseLineParticipants = zeros(baseLineParticipantNum, 1);
-%             baseLineData = {zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), ...
-%                 zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), zeros(baseLineParticipantNum, 1), };
             randCreatedNum = 0;
             % store baseline trial 6 data. later will be assigned to properties
             heatMapDataTrial6 = zeros(6, 6); % trial 6 only
-            heatMapParticipantNum = 0;
+            heatMapParticipantNum = 0; % 
             averageBaseLineCorr = zeros(6, 1);
+            
+            
+            
+            
+            
             
             
             while true
                 participantIndex = ceil(rand * size(obj.typicalParticipantData, 2));
-                % does not included yet && heat map data not empty
+                % isn't included yet && heat map data not empty
                 if(~ismember(participantIndex, baseLineParticipants) && ~isempty(DataAnalyzer.getHeatMapData(obj.typicalParticipantData{participantIndex}, mazeIndex)))
                     randCreatedNum = randCreatedNum + 1;
                     baseLineParticipants(randCreatedNum, 1) = participantIndex;
@@ -199,41 +213,42 @@ classdef DataAnalyzer < handle
                 end
             end
             
+            % calculate average of trial 6 of all selected typical participants.
             for i = 1 : baseLineParticipantNum
-                returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
-                heatMapParticipantNum = heatMapParticipantNum + 1;
-                heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
-            end
-            
+                if(~isempty(DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex)))
+                    returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
+                    heatMapParticipantNum = heatMapParticipantNum + 1; 
+                    heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
+                end
+            end   
             % assign to specific properties in the object
             if(mazeIndex == 8)
                 obj.standardMaze8Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
             elseif(mazeIndex == 11)
                 obj.standardMaze11Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
             end  
+            
             % run correlations on baseline participants and plot the region
             trialNum = [1, 2, 3, 4, 5, 6];
             figure;
             hold on;     
             for i = 1 : baseLineParticipantNum
-                thisPart = obj.typicalParticipantData{baseLineParticipants(i, 1)};
-%                 refData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
                 returnData = DataAnalyzer.getHeatMapData(obj.typicalParticipantData{baseLineParticipants(i, 1)}, mazeIndex);
                 if(~isempty(returnData))
                     returnCorr = applyCorrelation(obj, returnData, mazeIndex);
-                    plot(trialNum, returnCorr, 'bo');
+                    plot(trialNum, returnCorr, '-bo');
                     averageBaseLineCorr = averageBaseLineCorr + returnCorr;
                 end
-                
             end
             averageBaseLineCorr = averageBaseLineCorr / baseLineParticipantNum;
             plot(trialNum, averageBaseLineCorr, '-y*');
             hold off;
         end
         
+        % Plot correlation of all atypical participants on current figure
+        % Run createBaseLine first
         function plotAtypicalCorr(obj, mazeIndex)
             trialNum = [1, 2, 3, 4, 5, 6];
-%             figure;
             hold on;
             for i = 1 : size(obj.atypicalParticipantData, 2)
                 returnData = DataAnalyzer.getHeatMapData(obj.atypicalParticipantData{i}, mazeIndex);
@@ -246,30 +261,42 @@ classdef DataAnalyzer < handle
             hold off;
         end
         
-        % get data using DataAnalyzer.getHeatMapData first, then call this
+        % Get data using DataAnalyzer.getHeatMapData first, then call this
         % method with the data returned
         function returnCorr = applyCorrelation(obj, heatMapData, mazeIndex)
             standard = zeros(6, 6);
             returnCorr = zeros(6, 1);
             
-            % if compare with average, comment out the line after this if block 
-%             if(mazeIndex == 8)
-%                 standard = obj.standardMaze8Trial6;
-%             elseif(mazeIndex == 11)
-%                 standard = obj.standardMaze11Trial6;
-%             end
+            % if compare with average, comment out the line after this if else block 
+            if(mazeIndex == 8)
+                standard = obj.standardMaze8Trial6;
+            elseif(mazeIndex == 11)
+                standard = obj.standardMaze11Trial6;
+            end
             % if compare with this participant's own trial 6
-            standard = heatMapData{6};
-            
+%             standard = heatMapData{6};
+
+
+%             standard(1 : 6, 1 : 6) = -1;
+%             standard = ones(6, 6);
+%             standard(1 : 6, 1 : 6) = 0.3;
+
+            standard = DataAnalyzer.excludeGrids(standard, {'A1', 'A2', 'A3', 'A4', 'B4', 'C4', 'C3', 'D3', 'E3', 'F3', 'F4', 'F5', 'F6'});
+
             % run through 6 trials
             for i = 1 : size(heatMapData, 2)
-                xcorrResult = normxcorr2(heatMapData{i}, standard);
-                returnCorr(i, 1) = sum(xcorrResult, 'all');
-%                 returnCorr(i, 1) = 0.5 * ssim(heatMapData{i}, standard) + 0.5;
+                
+                heatMapData{i} = DataAnalyzer.excludeGrids(heatMapData{i}, {'A1', 'A2', 'A3', 'A4', 'B4', 'C4', 'C3', 'D3', 'E3', 'F3', 'F4', 'F5', 'F6'});        
+                
+%                 xcorrResult = normxcorr2(heatMapData{i}, standard);
+%                 returnCorr(i, 1) = sum(xcorrResult, 'all');
+
+                returnCorr(i, 1) = 0.5 * ssim(heatMapData{i}, standard) + 0.5;
+%                 returnCorr(i, 1) = immse(heatMapData{i}, standard);
+%                 [~, returnCorr(i, 1)] = psnr(heatMapData{i}, standard);
             end
+
         end
-        
-        
         
         function returnData = averageData(obj, mazeIndex, participantType, dataType)
             returnData = zeros(1, DataAnalyzer.MAZE_NUM);
@@ -313,19 +340,47 @@ classdef DataAnalyzer < handle
                 case 'atypical'
                     returnObj = obj.atypicalParticipantData;
             end
-        end
-        
-        
+        end    
     end
     
+    % tools used 
     methods(Static)
-        
+        function executedSingleHeatMap = excludeGrids(singleHeatMapData, grids)
+            executedSingleHeatMap = singleHeatMapData;
+            for i = 1 : size(grids, 2)
+                thisGridY = grids{i}(2);
+                switch(grids{i}(1))
+                    case 'A'
+                        thisGridX = 1;
+                    case 'B'
+                        thisGridX = 2;
+                    case 'C'
+                        thisGridX = 3;
+                    case 'D'
+                        thisGridX = 4;
+                    case 'E'
+                        thisGridX = 5;
+                    case 'F'
+                        thisGridX = 6;
+                end
+                executedSingleHeatMap(str2double(thisGridY), thisGridX) = 0;
+            end
+        end
+   
         function averageTrials = drawHeatMaps(heatMapData)
             averageTrials = zeros(6, 6);
             for i = 1 : size(heatMapData, 2)
                 subplot(3, 3, i);
                 title = sprintf("trial %d", i);
-                DataAnalyzer.drawSingleHeatMap(heatMapData{i}, [-0.5, 2.5], title);
+                
+                thisHeatMapData = heatMapData{i};
+%                 thisHeatMapData = DataAnalyzer.excludeGrids(thisHeatMapData, {'A1', 'A2', 'A3', 'A4', 'B4', 'C4', 'C3', 'D3', 'E3', 'F3', 'F4', 'F5', 'F6'});
+                
+                
+%                 DataAnalyzer.drawSingleHeatMap(heatMapData{i}, [-0.5, 2.5], title);
+
+                DataAnalyzer.drawSingleHeatMap(thisHeatMapData, [-0.5, 2.5], title);
+                
                 averageTrials = averageTrials + heatMapData{i};
             end
             averageTrials = averageTrials / size(heatMapData, 2);
@@ -353,49 +408,50 @@ classdef DataAnalyzer < handle
             if(~isempty(dataTable))
                 for j = 1 : size(dataTable, 1)
                     thisRow = dataTable(j, :);
-                    returnObj{thisRow.maze_trial}(1, 1) = returnObj{thisRow.maze_trial}(1, 1) + thisRow.A1;
-                    returnObj{thisRow.maze_trial}(2, 1) = returnObj{thisRow.maze_trial}(2, 1) + thisRow.A2;
-                    returnObj{thisRow.maze_trial}(3, 1) = returnObj{thisRow.maze_trial}(3, 1) + thisRow.A3;
-                    returnObj{thisRow.maze_trial}(4, 1) = returnObj{thisRow.maze_trial}(4, 1) + thisRow.A4;
-                    returnObj{thisRow.maze_trial}(5, 1) = returnObj{thisRow.maze_trial}(5, 1) + thisRow.A5;
-                    returnObj{thisRow.maze_trial}(6, 1) = returnObj{thisRow.maze_trial}(6, 1) + thisRow.A6;
+                    returnObj{thisRow.maze_trial}(1, 1) = thisRow.A1;
+                    returnObj{thisRow.maze_trial}(2, 1) = thisRow.A2;
+                    returnObj{thisRow.maze_trial}(3, 1) = thisRow.A3;
+                    returnObj{thisRow.maze_trial}(4, 1) = thisRow.A4;
+                    returnObj{thisRow.maze_trial}(5, 1) = thisRow.A5;
+                    returnObj{thisRow.maze_trial}(6, 1) = thisRow.A6;
                     
-                    returnObj{thisRow.maze_trial}(1, 2) = returnObj{thisRow.maze_trial}(1, 2) + thisRow.B1;
-                    returnObj{thisRow.maze_trial}(2, 2) = returnObj{thisRow.maze_trial}(2, 2) + thisRow.B2;
-                    returnObj{thisRow.maze_trial}(3, 2) = returnObj{thisRow.maze_trial}(3, 2) + thisRow.B3;
-                    returnObj{thisRow.maze_trial}(4, 2) = returnObj{thisRow.maze_trial}(4, 2) + thisRow.B4;
-                    returnObj{thisRow.maze_trial}(5, 2) = returnObj{thisRow.maze_trial}(5, 2) + thisRow.B5;
-                    returnObj{thisRow.maze_trial}(6, 2) = returnObj{thisRow.maze_trial}(6, 2) + thisRow.B6;
+                    returnObj{thisRow.maze_trial}(1, 2) = thisRow.B1;
+                    returnObj{thisRow.maze_trial}(2, 2) = thisRow.B2;
+                    returnObj{thisRow.maze_trial}(3, 2) = thisRow.B3;
+                    returnObj{thisRow.maze_trial}(4, 2) = thisRow.B4;
+                    returnObj{thisRow.maze_trial}(5, 2) = thisRow.B5;
+                    returnObj{thisRow.maze_trial}(6, 2) = thisRow.B6;
                     
-                    returnObj{thisRow.maze_trial}(1, 3) = returnObj{thisRow.maze_trial}(1, 3) + thisRow.C1;
-                    returnObj{thisRow.maze_trial}(2, 3) = returnObj{thisRow.maze_trial}(2, 3) + thisRow.C2;
-                    returnObj{thisRow.maze_trial}(3, 3) = returnObj{thisRow.maze_trial}(3, 3) + thisRow.C3;
-                    returnObj{thisRow.maze_trial}(4, 3) = returnObj{thisRow.maze_trial}(4, 3) + thisRow.C4;
-                    returnObj{thisRow.maze_trial}(5, 3) = returnObj{thisRow.maze_trial}(5, 3) + thisRow.C5;
-                    returnObj{thisRow.maze_trial}(6, 3) = returnObj{thisRow.maze_trial}(6, 3) + thisRow.C6;
+                    returnObj{thisRow.maze_trial}(1, 3) = thisRow.C1;
+                    returnObj{thisRow.maze_trial}(2, 3) = thisRow.C2;
+                    returnObj{thisRow.maze_trial}(3, 3) = thisRow.C3;
+                    returnObj{thisRow.maze_trial}(4, 3) = thisRow.C4;
+                    returnObj{thisRow.maze_trial}(5, 3) = thisRow.C5;
+                    returnObj{thisRow.maze_trial}(6, 3) = thisRow.C6;
                     
-                    returnObj{thisRow.maze_trial}(1, 4) = returnObj{thisRow.maze_trial}(1, 4) + thisRow.D1;
-                    returnObj{thisRow.maze_trial}(2, 4) = returnObj{thisRow.maze_trial}(2, 4) + thisRow.D2;
-                    returnObj{thisRow.maze_trial}(3, 4) = returnObj{thisRow.maze_trial}(3, 4) + thisRow.D3;
-                    returnObj{thisRow.maze_trial}(4, 4) = returnObj{thisRow.maze_trial}(4, 4) + thisRow.D4;
-                    returnObj{thisRow.maze_trial}(5, 4) = returnObj{thisRow.maze_trial}(5, 4) + thisRow.D5;
-                    returnObj{thisRow.maze_trial}(6, 4) = returnObj{thisRow.maze_trial}(6, 4) + thisRow.D6;
+                    returnObj{thisRow.maze_trial}(1, 4) = thisRow.D1;
+                    returnObj{thisRow.maze_trial}(2, 4) = thisRow.D2;
+                    returnObj{thisRow.maze_trial}(3, 4) = thisRow.D3;
+                    returnObj{thisRow.maze_trial}(4, 4) = thisRow.D4;
+                    returnObj{thisRow.maze_trial}(5, 4) = thisRow.D5;
+                    returnObj{thisRow.maze_trial}(6, 4) = thisRow.D6;
                     
-                    returnObj{thisRow.maze_trial}(1, 5) = returnObj{thisRow.maze_trial}(1, 5) + thisRow.E1;
-                    returnObj{thisRow.maze_trial}(2, 5) = returnObj{thisRow.maze_trial}(2, 5) + thisRow.E2;
-                    returnObj{thisRow.maze_trial}(3, 5) = returnObj{thisRow.maze_trial}(3, 5) + thisRow.E3;
-                    returnObj{thisRow.maze_trial}(4, 5) = returnObj{thisRow.maze_trial}(4, 5) + thisRow.E4;
-                    returnObj{thisRow.maze_trial}(5, 5) = returnObj{thisRow.maze_trial}(5, 5) + thisRow.E5;
-                    returnObj{thisRow.maze_trial}(6, 5) = returnObj{thisRow.maze_trial}(6, 5) + thisRow.E6;
+                    returnObj{thisRow.maze_trial}(1, 5) = thisRow.E1;
+                    returnObj{thisRow.maze_trial}(2, 5) = thisRow.E2;
+                    returnObj{thisRow.maze_trial}(3, 5) = thisRow.E3;
+                    returnObj{thisRow.maze_trial}(4, 5) = thisRow.E4;
+                    returnObj{thisRow.maze_trial}(5, 5) = thisRow.E5;
+                    returnObj{thisRow.maze_trial}(6, 5) = thisRow.E6;
                     
-                    returnObj{thisRow.maze_trial}(1, 6) = returnObj{thisRow.maze_trial}(1, 6) + thisRow.F1;
-                    returnObj{thisRow.maze_trial}(2, 6) = returnObj{thisRow.maze_trial}(2, 6) + thisRow.F2;
-                    returnObj{thisRow.maze_trial}(3, 6) = returnObj{thisRow.maze_trial}(3, 6) + thisRow.F3;
-                    returnObj{thisRow.maze_trial}(4, 6) = returnObj{thisRow.maze_trial}(4, 6) + thisRow.F4;
-                    returnObj{thisRow.maze_trial}(5, 6) = returnObj{thisRow.maze_trial}(5, 6) + thisRow.F5;
-                    returnObj{thisRow.maze_trial}(6, 6) = returnObj{thisRow.maze_trial}(6, 6) + thisRow.F6;
+                    returnObj{thisRow.maze_trial}(1, 6) = thisRow.F1;
+                    returnObj{thisRow.maze_trial}(2, 6) = thisRow.F2;
+                    returnObj{thisRow.maze_trial}(3, 6) = thisRow.F3;
+                    returnObj{thisRow.maze_trial}(4, 6) = thisRow.F4;
+                    returnObj{thisRow.maze_trial}(5, 6) = thisRow.F5;
+                    returnObj{thisRow.maze_trial}(6, 6) = thisRow.F6;
                 end
             else
+                % is empty
                 returnObj = dataTable;
             end
         end
@@ -408,8 +464,9 @@ classdef DataAnalyzer < handle
             end
         end
         
-        % this method is created because matlab automatatically changes the
+        % This method is created because matlab automatatically changes the
         % name of variables when reading the table
+        % DataAnalyzer.TEST is used to find variables sensitive to groups
         function returnObj = getDataFromRow(thisRow, dataType)
             switch(dataType)
                 case DataAnalyzer.TRIAL

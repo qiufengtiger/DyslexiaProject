@@ -1,7 +1,9 @@
+% Object used to store data for each individual participant
 classdef Participant
     properties
         name;
         group;
+        gender;
         dataTableMaze1;
         dataTableMaze5;
         dataTableMaze6;
@@ -12,10 +14,19 @@ classdef Participant
         dataTableMaze8HeatMap;
         dataTableMaze11HeatMap;
     end
+    
+    properties(Constant)
+        FEMALE = 1;
+        MALE = 2;
+        UNKNOWN = 3;
+    end
+    
     methods
         function obj = Participant(name, group)
             obj.name = name;
             obj.group = group;
+            obj.gender = Participant.UNKNOWN; % default
+            % initialize with empty tables
             obj.dataTableMaze1 = table;
             obj.dataTableMaze5 = table;
             obj.dataTableMaze6 = table;

@@ -1,11 +1,13 @@
+% Collect data from csv files
 classdef DataCollector < handle
     properties
         allParticipantName;
         allParticipantData;
-        fileNameArray;
-        
+        fileNameArray;   
     end
     methods
+        % Constructor
+        % File names are stored in parameters.m
         function obj = DataCollector
             obj.allParticipantName = {};
             obj.fileNameArray = evalin('base', 'fileNameArray');
@@ -19,6 +21,7 @@ classdef DataCollector < handle
             end
         end
         
+        % Read files and store in base workspace
         function readFile(obj, fileName)
             filePath = sprintf('./data/%s.csv', fileName);
             fileTable = readtable(filePath);
@@ -26,10 +29,6 @@ classdef DataCollector < handle
             varName = sprintf('dataTable_%s', fileName);
             assignin('base', varName, fileTable);
             
-            %             % update participant list
-            %             currentParticipantList = unique(fileTable.Participant);
-            %             obj.allParticipantList = unique(cat(1, currentParticipantList, obj.allParticipantList));
-            %
             for i = 1 : size(fileTable)
                 thisRow = fileTable(i, :);
                 % instantiate this participant
@@ -38,6 +37,7 @@ classdef DataCollector < handle
                     thisParticipant = Participant(cell2mat(thisRow.Participant), thisRow.Group);
                     obj.allParticipantData{end + 1} = thisParticipant;
                 end
+                % load data and save to this participant
                 for j = 1 : size(obj.allParticipantData, 2)
                     if(strcmp(get(obj.allParticipantData{j}, 'name'), cell2mat(thisRow.Participant)))
                         obj.allParticipantData{j} = addDataTable(obj.allParticipantData{j}, thisRow);
@@ -46,7 +46,8 @@ classdef DataCollector < handle
             end
         end
         
-        
+        % Read heat map data and store in base workspace & corresponding
+        % participants
         function readFileHeatMap(obj, fileName, mazeIndex)
             filePath = sprintf('./data/%s.csv', fileName);
             fileTable = readtable(filePath);
@@ -64,6 +65,29 @@ classdef DataCollector < handle
             end
         end
         
+        
+        % The reason why it does not generate each participant using this
+        % overall data file is that the maze data tables used above contain
+        % more participant, even though some data of these extra
+        % participants are missing
+        function readFileOverallData(obj, fileName)
+            filePath = sprintf('./data/%s.csv', fileName);
+            fileTable = readtable(filePath);
+%             fileName = strrep(fileName, '-', '_');
+%             varName = sprintf('%s', fileName);
+            assignin('base', 'overallData', fileTable);
+            for i = 1 : size(fileTable)
+                thisRow = fileTable(i, :);
+                for j = 1 : size(obj.allParticipantData, 2)
+                    if(strcmp(get(obj.allParticipantData{j}, 'name'),  cell2mat(thisRow.Participant_ID)))
+                        obj.allParticipantData{j}.gender = thisRow.Gender;
+                        break;
+                    end     
+                end 
+            end
+            
+        end
+        
         function returnObj = get(obj, propertyName)
             switch(propertyName)
                 case 'name'
@@ -71,11 +95,6 @@ classdef DataCollector < handle
                 case 'data'
                     returnObj = obj.allParticipantData;
             end
-        end
-        
-        function print(obj)
-            fileTable = evalin('base', 'fileTable');
-            c = cell2mat(fileTable{1, 'Participant'})
         end
     end
 end
