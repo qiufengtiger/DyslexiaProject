@@ -80,7 +80,20 @@ classdef DataCollector < handle
                 thisRow = fileTable(i, :);
                 for j = 1 : size(obj.allParticipantData, 2)
                     if(strcmp(get(obj.allParticipantData{j}, 'name'),  cell2mat(thisRow.Participant_ID)))
+                        % gender
                         obj.allParticipantData{j}.gender = thisRow.Gender;
+                        % school
+                        if(strcmp(thisRow.school, 'Desert'))
+                            obj.allParticipantData{j}.school = Participant.DESERT;
+                        elseif(strcmp(thisRow.school, 'Riverst'))
+                            obj.allParticipantData{j}.school = Participant.RIVERST;
+                        end
+                        % ageGroup
+                        if(thisRow.age < 10)
+                            obj.allParticipantData{j}.ageGroup = Participant.AGE_GROUP1;
+                        else
+                            obj.allParticipantData{j}.ageGroup = Participant.AGE_GROUP2;
+                        end
                         break;
                     end     
                 end 

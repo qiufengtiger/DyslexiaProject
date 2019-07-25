@@ -4,6 +4,10 @@ classdef Participant
         name;
         group;
         gender;
+        school;
+        
+        ageGroup;
+        
         dataTableMaze1;
         dataTableMaze5;
         dataTableMaze6;
@@ -16,9 +20,20 @@ classdef Participant
     end
     
     properties(Constant)
+        UNKNOWN = 0;
+        
+        % gender
         FEMALE = 1;
         MALE = 2;
-        UNKNOWN = 3;
+        
+        % schools
+        DESERT = 1;
+        RIVERST = 2;
+        
+        % ageGroup
+        AGE_GROUP1 = 1;
+        AGE_GROUP2 = 2;
+        
     end
     
     methods
@@ -26,6 +41,8 @@ classdef Participant
             obj.name = name;
             obj.group = group;
             obj.gender = Participant.UNKNOWN; % default
+            obj.school = Participant.UNKNOWN;
+            obj.ageGroup = Participant.UNKNOWN;
             % initialize with empty tables
             obj.dataTableMaze1 = table;
             obj.dataTableMaze5 = table;
