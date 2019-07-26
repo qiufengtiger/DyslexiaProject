@@ -54,4 +54,33 @@ createBaseLine(da, 8, 'age', Participant.AGE_GROUP1);
 createBaseLine(da, 11, 'gender', Participant.MALE);
 ```
 
-### 
+### Draw heatmaps
+The program can also draw average heatmaps of all 6 trials of a specific maze.
+To plot heatmaps, run:
+```
+summaryHeatMap(da, participantType, mazeIndex);
+```
+`participantType` can either be `DataAnalyzer.TYPICAL` or `DataAnalyzer.ATYPICAL`.
+
+`mazeIndex` can either be `8` or `11`.
+
+It will plot heatmaps of the average of each trial along with the average of all 6 trials.
+
+e.g.
+```
+summaryHeatMap(da, DataAnalyzer.TYPICAL, 8);
+```
+
+### Plot average data
+To plot average data trendlines of all mazes:
+```
+summaryParticipantGroup(da);
+```
+It will plot the specified data of typical vs. atypical.
+
+To check or change data type, go to variable `dataType` in function `summaryParticipantGroup` in class `DataAnalyzer`.
+
+## Author
+* Feng Qiu - [qiufengtiger](https://github.com/qiufengtiger)
+
+(Feel free to contact me if you have questions! Also I will add you to the collaborator if you wish to have full access to this git to continue this research and update this program!)
