@@ -199,7 +199,11 @@ classdef DataAnalyzer < handle
             averageBaseLineCorr = zeros(6, 1);
             
             % where baseline participants are chosen
-            baseLineSource = DataAnalyzer.findInGroup(obj.typicalParticipantData, type, value);
+            if(strcmp(type, 'none'))
+                baseLineSource = obj.typicalParticipantData;
+            else
+                baseLineSource = DataAnalyzer.findInGroup(obj.typicalParticipantData, type, value);
+            end   
             % #participant having none empty heat map data
             noneEmptyNum = size(nonzeros(cellfun(@(x) ~isempty(DataAnalyzer.getHeatMapData(x, mazeIndex)), baseLineSource)), 1);
             
