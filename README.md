@@ -50,6 +50,7 @@ To check or change the reference of the correlation, go to variable `standard` i
 
 e.g.
 ```
+createBaseLine(da, 8, 'none', 0);
 createBaseLine(da, 8, 'age', Participant.AGE_GROUP1);
 createBaseLine(da, 11, 'gender', Participant.MALE);
 ```
