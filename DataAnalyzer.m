@@ -187,28 +187,33 @@ classdef DataAnalyzer < handle
         % correlation of their each trial to their trial 6. The original
         % version uses the average of trial 6 data as correlation reference
         function createBaseLine(obj, mazeIndex, type, value)
-            baseLineParticipantNum = 24; % #typical participant used
+            % #typical participant used
+            % the program will throw a warning if it's greater than the
+            % total #participant
+            baseLineParticipantNum = 47; 
             baseLineParticipants = zeros(baseLineParticipantNum, 1);
             randCreatedNum = 0;
             % store baseline trial 6 data. later will be assigned to properties
             heatMapDataTrial6 = zeros(6, 6); % trial 6 only
-            heatMapParticipantNum = 0; % 
+            heatMapParticipantNum = 0;
             averageBaseLineCorr = zeros(6, 1);
             
             % where baseline participants are chosen
-%             baseLineSource = obj.typicalParticipantData;
             baseLineSource = DataAnalyzer.findInGroup(obj.typicalParticipantData, type, value);
-%             noneEmptyNum = size(nonzeros(cellfun(@(x) ~isempty(DataAnalyzer.getHeatMapData(x, mazeIndex)), baseLineSource)), 1);
+            % #participant having none empty heat map data
+            noneEmptyNum = size(nonzeros(cellfun(@(x) ~isempty(DataAnalyzer.getHeatMapData(x, mazeIndex)), baseLineSource)), 1);
             
+            % randomly select participants in typical group
             while true
                 % in case that baseline participant num entered exceeds total participant num 
-%                 if(randCreatedNum == noneEmptyNum)
-%                     break;
-%                 end
+                if(randCreatedNum == noneEmptyNum)
+                    warning('baseLineParticipantNum %d exceeds group size %d!\n', baseLineParticipantNum, noneEmptyNum);
+                    break;
+                end
                 participantIndex = ceil(rand * size(baseLineSource, 2));
                 % isn't included yet && heat map data not empty
                 if(~ismember(participantIndex, baseLineParticipants) && ~isempty(DataAnalyzer.getHeatMapData(baseLineSource{participantIndex}, mazeIndex)))
-                    randCreatedNum = randCreatedNum + 1
+                    randCreatedNum = randCreatedNum + 1;
                     baseLineParticipants(randCreatedNum, 1) = participantIndex;
                 end
                 if(randCreatedNum == baseLineParticipantNum)
@@ -216,16 +221,22 @@ classdef DataAnalyzer < handle
                 end
             end
             
-            % calculate average of trial 6 of all selected typical participants.
+            % calculate average of trial 6 of all selected typical
+            % participants for the reference
             for i = 1 : baseLineParticipantNum
-%                 baseLineParticipants(i, 1)
+                % it can be 0 if baseLineParticipantNum > #participant
+                % having none empty heat map data
+                if(baseLineParticipants(i, 1) == 0)
+                    break;
+                end
                 if(~isempty(DataAnalyzer.getHeatMapData(baseLineSource{baseLineParticipants(i, 1)}, mazeIndex)))
                     returnData = DataAnalyzer.getHeatMapData(baseLineSource{baseLineParticipants(i, 1)}, mazeIndex);
                     heatMapParticipantNum = heatMapParticipantNum + 1; 
                     heatMapDataTrial6 = heatMapDataTrial6 + returnData{6};
                 end
             end   
-            % assign to specific properties in the object
+            % assign to specific properties in the object for plotting
+            % atypical group
             if(mazeIndex == 8)
                 obj.standardMaze8Trial6 = heatMapDataTrial6 / heatMapParticipantNum;
             elseif(mazeIndex == 11)
@@ -282,12 +293,9 @@ classdef DataAnalyzer < handle
             end
             % if compare with this participant's own trial 6
 %             standard = heatMapData{6};
-
-
 %             standard(1 : 6, 1 : 6) = -1;
 %             standard = zeros(6, 6);
 %             standard(1 : 6, 1 : 6) = 0.3;
-
 %             standard = DataAnalyzer.excludeGrids(standard, {'A1', 'A2', 'A3', 'A4', 'B4', 'C4', 'C3', 'D3', 'E3', 'F3', 'F4', 'F5', 'F6'});
 
             % run through 6 trials
@@ -366,6 +374,7 @@ classdef DataAnalyzer < handle
             returnData(cellfun('isempty', returnData)) = [];
         end
         
+        % set pecific grids in heat map to 0
         function executedSingleHeatMap = excludeGrids(singleHeatMapData, grids)
             executedSingleHeatMap = singleHeatMapData;
             for i = 1 : size(grids, 2)
@@ -418,6 +427,7 @@ classdef DataAnalyzer < handle
             returnHeatMap.Title = title;
         end
         
+        % return heat map matrices of all 6 trials given a participant & maze number
         function returnObj = getHeatMapData(participant, mazeIndex)
             if(mazeIndex == 8)
                 mazeIndex = 'heatMap8';

@@ -73,8 +73,6 @@ classdef DataCollector < handle
         function readFileOverallData(obj, fileName)
             filePath = sprintf('./data/%s.csv', fileName);
             fileTable = readtable(filePath);
-%             fileName = strrep(fileName, '-', '_');
-%             varName = sprintf('%s', fileName);
             assignin('base', 'overallData', fileTable);
             for i = 1 : size(fileTable)
                 thisRow = fileTable(i, :);

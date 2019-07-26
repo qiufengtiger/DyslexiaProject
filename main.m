@@ -1,3 +1,6 @@
+% Author Feng Qiu qiuf@lafayette.edu
+% To get the latest version, go to https://github.com/qiufengtiger/DyslexiaProject
+
 clear all;
 % group
 % 1 typical
@@ -31,5 +34,7 @@ participantData = get(dc, 'data');
 %% Plot average data. Data type can be changed in the function
 % summaryParticipantGroup(da);
 %% Plot correlation on heat map data to each participant's trial 6 to check their improvment
-% createBaseLine(da, 8 / 11);
-% plotAtypicalCorr(da, 8 / 11);
+% createBaseLine(da, 8 / 11, type, value);
+% plotAtypicalCorr(da, 8 / 11, type, value);
+% type: gender, school, age
+%% For more info, check README file
