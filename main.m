@@ -6,6 +6,7 @@ clear all;
 % 1 typical
 % 2 atypical
 
+
 % Disable warnings
 warning('off', 'MATLAB:table:ModifiedAndSavedVarnames'); % some variable names in the csv file are not supported
 warning('off', 'MATLAB:textscan:AllNatSuggestFormat'); % variable names above will be changed automatically
@@ -26,15 +27,27 @@ participantData = get(dc, 'data');
 
 %% Run main and data should be collected and saved to workspace
 % After that, run following commands to start data analysis
+
+%% Available parameters in DataAnalyzer
+%% dataType:
+% DataAnalyzer.DURATION
+% DataAnalyzer.DISTANCE
+% DataAnalyzer.MEAN_SPEED
+% DataAnalyzer.FROZEN_TIME
+% DataAnalyzer.TOTAL_ERROR
+%% type - value pair
+% gender: Participant.MALE / Participant.FEMALE
+% school: Participant.DESERT / Participant.RIVERST
+% age: Participant.AGE_GROUP1 / Participant.AGE_GROUP2
+
 %% Start
 % da = DataAnalyzer;
 % initializeAnalyzer(da);
-%% Create heat map. Pick correct inputs
-% summaryHeatMap(da, DataAnalyzer.TYPICAL / DataAnalyzer.ATYPICAL, 8 / 11);
+%% Create heat map. Pick of the option specified with (OR)
+% summaryHeatMap(da, DataAnalyzer.TYPICAL (OR) DataAnalyzer.ATYPICAL, 8 (OR) 11);
 %% Plot average data. Data type can be changed in the function
-% summaryParticipantGroup(da);
+% summaryParticipantGroup(da, dataType);
 %% Plot correlation on heat map data to each participant's trial 6 to check their improvment
-% createBaseLine(da, 8 / 11, type, value);
-% plotAtypicalCorr(da, 8 / 11, type, value);
-% type: gender, school, age
+% createBaseLine(da, 8 (OR) 11, type, value);
+% plotAtypicalCorr(da, 8 (OR) 11, type, value);
 %% For more info, check README file

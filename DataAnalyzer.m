@@ -86,8 +86,8 @@ classdef DataAnalyzer < handle
         
         % Draw line plots showing average data of all mazes. To change data type, modify
         % dataType variable. Available data types are in DataAnalyzer's properties
-        function summaryParticipantGroup(obj)
-            dataType = DataAnalyzer.DURATION;
+        function summaryParticipantGroup(obj, dataType)
+            %dataType = DataAnalyzer.DURATION;
             typicalMaze1 = averageData(obj, 1, DataAnalyzer.TYPICAL, dataType);
             atypicalMaze1 = averageData(obj, 1, DataAnalyzer.ATYPICAL, dataType);
             typicalMaze5 = averageData(obj, 5, DataAnalyzer.TYPICAL, dataType);
@@ -103,6 +103,9 @@ classdef DataAnalyzer < handle
             printResult();
             
             function printResult()
+                figureName = 'summaryParticipantGroup: ';
+                figureName = strcat(figureName, DataAnalyzer.dataTypeToString(dataType));
+                figure('Name', figureName);
                 trialNum = [1, 2, 3, 4, 5, 6];
                 subplot(3, 2, 1);
                 plot(trialNum, typicalMaze1, '-o');
@@ -518,6 +521,25 @@ classdef DataAnalyzer < handle
                     returnObj = thisRow.TotalErrors;
                 case DataAnalyzer.TEST
                     returnObj = DataAnalyzer.cell2Num(thisRow.Distance) / DataAnalyzer.cell2Num(thisRow.Duration_s_);
+            end
+        end
+        
+        function returnObj = dataTypeToString(dataType)
+            switch(dataType)
+                case DataAnalyzer.TRIAL
+                    returnObj = 'TRIAL';
+                case DataAnalyzer.DURATION
+                    returnObj = 'DURATION';
+                case DataAnalyzer.DISTANCE
+                    returnObj = 'DISTANCE';
+                case DataAnalyzer.MEAN_SPEED
+                    returnObj = 'MEAN_SPEED';
+                case DataAnalyzer.FROZEN_TIME
+                    returnObj = 'FROZEN_TIME';
+                case DataAnalyzer.TOTAL_ERROR
+                    returnObj = 'TOTAL_ERROR';
+                case DataAnalyzer.TEST
+                    returnObj = 'TEST';
             end
         end
     end
