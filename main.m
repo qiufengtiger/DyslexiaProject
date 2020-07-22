@@ -36,9 +36,9 @@ participantData = get(dc, 'data');
 % DataAnalyzer.FROZEN_TIME
 % DataAnalyzer.TOTAL_ERROR
 %% type - value pair
-% gender: Participant.MALE / Participant.FEMALE
-% school: Participant.DESERT / Participant.RIVERST
-% age: Participant.AGE_GROUP1 / Participant.AGE_GROUP2
+% 'gender': Participant.MALE / Participant.FEMALE
+% 'school': Participant.DESERT / Participant.RIVERST
+% 'age': Participant.AGE_GROUP1 / Participant.AGE_GROUP2
 
 %% Start
 % da = DataAnalyzer;
