@@ -49,6 +49,7 @@ To check or change how data are filtered according to `type` & `value`, go to fu
 To check or change the reference of the correlation, go to variable `standard` in function `applyCorrelation` in class `DataAnalyzer`. 
 
 e.g.
+
 ```
 createBaseLine(da, 8, 'none', 0);
 createBaseLine(da, 8, 'age', Participant.AGE_GROUP1);
@@ -75,11 +76,19 @@ summaryHeatMap(da, DataAnalyzer.TYPICAL, 8);
 ### Plot average data
 To plot average data trendlines of all mazes:
 ```
-summaryParticipantGroup(da);
+summaryParticipantGroup(da, dataType);
 ```
 It will plot the specified data of typical vs. atypical.
 
-To check or change data type, go to variable `dataType` in function `summaryParticipantGroup` in class `DataAnalyzer`.
+Available `dataType`:
+
+```
+DataAnalyzer.DURATION
+DataAnalyzer.DISTANCE
+DataAnalyzer.MEAN_SPEED
+DataAnalyzer.FROZEN_TIME
+DataAnalyzer.TOTAL_ERROR
+```
 
 ## Author
 * Feng Qiu - [qiufengtiger](https://github.com/qiufengtiger)

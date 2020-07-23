@@ -193,7 +193,7 @@ classdef DataAnalyzer < handle
             % #typical participant used
             % the program will throw a warning if it's greater than the
             % total #participant
-            baseLineParticipantNum = 47; 
+            baseLineParticipantNum = 20; 
             baseLineParticipants = zeros(baseLineParticipantNum, 1);
             randCreatedNum = 0;
             % store baseline trial 6 data. later will be assigned to properties
