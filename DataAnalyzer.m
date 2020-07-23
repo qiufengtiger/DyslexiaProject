@@ -81,7 +81,7 @@ classdef DataAnalyzer < handle
             for i = 1 : size(heatMapData, 2)
                 heatMapData{i} = heatMapData{i} / heatMapParticipantNum(i);
             end
-            DataAnalyzer.drawHeatMaps(heatMapData); 
+            DataAnalyzer.drawHeatMaps(heatMapData, participantType, mazeIndex); 
         end
         
         % Draw line plots showing average data of all mazes. To change data type, modify
@@ -404,7 +404,11 @@ classdef DataAnalyzer < handle
             end
         end
    
-        function averageTrials = drawHeatMaps(heatMapData)
+        function averageTrials = drawHeatMaps(heatMapData, participantType, mazeIndex)
+            figureName = 'summaryHeatMap: ';
+            figureName = strcat(figureName, DataAnalyzer.participantTypeToString(participantType));
+            figureName = strcat(figureName, int2str(mazeIndex));
+            figure('Name', figureName);
             averageTrials = zeros(6, 6);
             for i = 1 : size(heatMapData, 2)
                 subplot(3, 3, i);
@@ -541,6 +545,15 @@ classdef DataAnalyzer < handle
                 case DataAnalyzer.TEST
                     returnObj = 'TEST';
             end
+        end
+        
+        function returnObj = participantTypeToString(participantType)
+           switch(participantType)
+               case DataAnalyzer.TYPICAL
+                   returnObj = 'TYPICAL';
+               case DataAnalyzer.ATYPICAL
+                   returnObj = 'ATYPICAL';
+           end
         end
     end
 end
