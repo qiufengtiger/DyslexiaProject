@@ -45,7 +45,7 @@ participantData = get(dc, 'data');
 % initializeAnalyzer(da);
 %% Create heat map. Pick of the option specified with (OR)
 % summaryHeatMap(da, DataAnalyzer.TYPICAL (OR) DataAnalyzer.ATYPICAL, 8 (OR) 11);
-%% Plot average data. Data type can be changed in the function
+%% Plot average data.
 % summaryParticipantGroup(da, dataType);
 %% Plot correlation on heat map data to each participant's trial 6 to check their improvment
 % createBaseLine(da, 8 (OR) 11, type, value);

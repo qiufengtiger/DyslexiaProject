@@ -78,6 +78,7 @@ To plot average data trendlines of all mazes:
 ```
 summaryParticipantGroup(da, dataType);
 ```
+
 It will plot the specified data of typical vs. atypical.
 
 Available `dataType`:
