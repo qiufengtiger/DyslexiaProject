@@ -1,5 +1,6 @@
 *.asv
 /data
+/DyslexiaPaperPlots
 fileName.mat
 collectedData.mat
 collectedDataWithHeatMap.mat
