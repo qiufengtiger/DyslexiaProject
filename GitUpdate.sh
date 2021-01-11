@@ -1,0 +1,11 @@
+git add .gitignore
+git add GitUpdate.sh
+git add DataAnalyzer.m
+git add DataCollector.m
+git add Parameters.m
+git add Participant.m
+git add README.md
+git add main.m
+git add NNAnalyzer.m
+git add NN/NeuralNet.py
+git add NN/ConvertBinary.py

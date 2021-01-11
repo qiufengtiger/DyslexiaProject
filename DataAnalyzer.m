@@ -186,6 +186,12 @@ classdef DataAnalyzer < handle
             correctPrediction / totalPrediction    
         end
         
+        function createBaseLineAndPlotAtypicalCorr(obj, mazeIndex, type, value)
+            createBaseLine(obj, mazeIndex, type, value);
+            plotAtypicalCorr(obj, mazeIndex, type, value);
+        end
+        
+        
         % Randomly select certain number of typical participants and draw the 
         % correlation of their each trial to their trial 6. The original
         % version uses the average of trial 6 data as correlation reference

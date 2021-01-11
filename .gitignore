@@ -4,4 +4,7 @@
 fileName.mat
 collectedData.mat
 collectedDataWithHeatMap.mat
-.DS_Store
+overallData.csv
+**/.DS_Store
+**/._.DS_Store
+**/._*

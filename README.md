@@ -9,6 +9,7 @@ First create a folder called 'data' in the root directory. It will contain all t
 If reading a maze-specific data file, add it to `fileNameArray` in Parameters.m with only the file name (remove expansion .csv). Otherwise, use corresponding readFileXXX method in `main.m`. 
 
 e.g.
+
 ```
 fileNameArray = ["2013-05-28_MAZE1",  "2013-05-28_MAZE5"];
 readFileHeatMap(dc, 'Combined_Maze_11_data_UPDATED_PE', 11);
@@ -25,18 +26,22 @@ What you are looking for is a cell array called `participantData`, where all the
 
 ### Start DataAnalyzer
 All the analyzing functions are in class DataAnalyzer. To run `DataAnalyzer`:
+
 ```
 da = DataAnalyzer;
 initializeAnalyzer(da);
 ```
+
 `da` will be the object name of the DataAnalyzer. It is a handle class so no need to do `da = initializeAnalyzer(da);`. 
 `initializeAnalyzer(da)` will read data from base workspace and store in `DataAnalyzer`.
 
 ### Run correlation
 Run correlation on heatmaps will compare the heatmap data to a certain reference. To run correlation on typical participants:
+
 ```
 createBaseLine(da, mazeIndex, type, value);
 ```
+
 `mazeIndex` can either be 8 or 11, because only these 2 mazes have heatmap data. `type` can be 'school', 'age' or 'gender', so the correlation analysis will only run on specified group.
 
 To check or change how data are read from overallData file and stored in each participant, 
@@ -59,6 +64,7 @@ createBaseLine(da, 11, 'gender', Participant.MALE);
 ### Draw heatmaps
 The program can also draw average heatmaps of all 6 trials of a specific maze.
 To plot heatmaps, run:
+
 ```
 summaryHeatMap(da, participantType, mazeIndex);
 ```
