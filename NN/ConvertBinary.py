@@ -30,9 +30,9 @@ def convert():
 		
 		
 
-		# move known result to the end
+		# push the known result to the front
 		row.pop(16)
-		row.append(group)
+		row.insert(0, group)
 		
 def writeResult(outputPath):
 	with open(outputPath, 'w+') as outputFile:
